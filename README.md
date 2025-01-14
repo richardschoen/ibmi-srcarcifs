@@ -19,6 +19,41 @@ Ex source member metadata:
 
 ## Ready for Affordable Git Source Code Management   
 ❗If you want an affordable and easy to implement Git source management tool, check out iForGit: https://www.iforgit.com
+
+# Installing and Building MBSRCARC via getrepo-mbsrcarc.sh script   
+
+***(Important to change SRCCCSID variable in build.sh to your local CCSID before running build.sh. Default=37)***
+
+Use the following install script if you want to run a single shell script to clone the repo and build the library.  
+https://github.com/richardschoen/ibmi-srcarcifs/refs/heads/master/getrepo-mbsrcarc.sh   
+
+## Download and run the getrepo-qshoni.sh script in one step, using wget
+❗This is the easiest way to install MBSRCARC. Run the following wget command to download, build and install MBSRCARC quickly in a single step.   
+Make sure a temporary dir named /tmp/MBSRCARC doesn't already exist before running the script or the git clone may fail to get current files from the repository.  
+```
+rm -r /tmp/MBSRCARC
+wget https://github.com/richardschoen/ibmi-srcarcifs/raw/refs/heads/master/getrepo-mbsrcarc.sh -O - | bash
+```
+
+## Manually download getrepo-mbsrcarc.sh and run it
+- Download the raw getrepo-mbsrcarc.sh script or create it manually in your IFS. https://github.com/richardschoen/ibmi-srcarcifs/refs/heads/master/getrepo-mbsrcarc.sh    
+- Then run the getrepo-mbsrcarc.sh script to automatically clone the repo and auto-run the build.sh to create the MBSRCARC library and associated objects.   
+```
+bash getrepo-mbsrcarc.sh
+```
+# Installing and Building MBSRCARC via Git clone and build.sh 
+
+***(Important to change SRCCCSID variable in build.sh to your local CCSID before running build.sh. Default=37)***
+
+```
+# Use this install method if you want to manually run each command from a QSH/PASE/SSH shell.
+mkdir /mbsrcarc
+cd /mbsrcarc 
+git -c http.sslVerify=false clone --recurse-submodules https://github.com/richardschoen/ibmi-srcarcifs.git
+cd mbsrcarc
+build.sh  
+```
+After building the MBSRCARC library the commands should be ready to use.
   
 ## Sample Command with all command parameters
 
