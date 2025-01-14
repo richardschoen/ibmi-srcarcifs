@@ -1,0 +1,493 @@
+/*----------------------------------------------------------------------------*/
+/* Program: SRCARCIFSC                                               */
+/* Desc: Archive source member file to IFS location                  */
+/*----------------------------------------------------------------------------*/
+             PGM        PARM(&FROMFULL &FROMMEMBER &ARCIFSDIR +
+                          &HOMESUBDIR &OUTPUTFMT &APPENDTS +
+                          &METAINFO &REPLACE &PROMPTSQL)
+
+             /* Variables                                                                  */
+             DCL        VAR(&SYSNAME) TYPE(*CHAR) LEN(8)
+             DCL        VAR(&PROMPTSQL) TYPE(*CHAR) LEN(4)
+             DCL        VAR(&METAINFO) TYPE(*CHAR) LEN(4)
+             DCL        VAR(&SQLMETA) TYPE(*CHAR) LEN(1000)
+             DCL        VAR(&HOMESUBDIR) TYPE(*CHAR) LEN(100)
+             DCL        VAR(&SRCLIBDIR) TYPE(*CHAR) LEN(255)
+             DCL        VAR(&SRCFILEDIR) TYPE(*CHAR) LEN(255)
+             DCL        VAR(&HOMEDIR) TYPE(*CHAR) LEN(640)
+             DCL        VAR(&MBRARCDIR) TYPE(*CHAR) LEN(255)
+             DCL        VAR(&CURUSER) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&ARCCOUNT) TYPE(*DEC) LEN(9 0)
+             DCL        VAR(&ARCCOUNTC) TYPE(*CHAR) LEN(9)
+             DCL        VAR(&ARCIFSDIR) TYPE(*CHAR) LEN(255)
+             DCL        VAR(&OUTPUTFILE) TYPE(*CHAR) LEN(255)
+             DCL        VAR(&OUTPUTMETA) TYPE(*CHAR) LEN(255)
+             DCL        VAR(&FROMFULL) TYPE(*CHAR) LEN(20)
+             DCL        VAR(&REPLACE) TYPE(*CHAR) LEN(4)
+             DCL        VAR(&OUTPUTFMT) TYPE(*CHAR) LEN(20)
+             DCL        VAR(&APPENDTS) TYPE(*CHAR) LEN(4)
+             DCL        VAR(&RECCOUNT) TYPE(*DEC) LEN(10 0)
+             DCL        VAR(&RECCOUNTC) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&FRMCOUNT) TYPE(*DEC) LEN(10 0)
+             DCL        VAR(&FRMCOUNTC) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&FROMLIB) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&FROMFILE) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&FROMMEMBER) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&FROMTEXT) TYPE(*CHAR) LEN(50)
+             DCL        VAR(&FROMMBR) TYPE(*CHAR) LEN(255)
+             DCL        VAR(&FROMTYPE) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&QT) TYPE(*CHAR) LEN(1) VALUE('''')
+             DCL        VAR(&LOGMSG) TYPE(*CHAR) LEN(200)
+             DCL        VAR(&CURJOB) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&CURUSER) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&CURNBR) TYPE(*CHAR) LEN(6)
+             DCL        VAR(&QDATE) TYPE(*CHAR) LEN(6)
+             DCL        VAR(&QTIME) TYPE(*CHAR) LEN(9)
+             DCL        VAR(&QDATEFMT) TYPE(*CHAR) LEN(20)
+             DCL        VAR(&QDATE10) TYPE(*CHAR) LEN(10)
+
+             /* Home dir parms */
+             DCL        VAR(&MYHOMEDIR) TYPE(*CHAR) LEN(640)
+             DCL        VAR(&UIDDEC) TYPE(*DEC) LEN(10 0)
+             DCL        VAR(&UID) TYPE(*UINT) LEN(4)
+             DCL        VAR(&DIRLEN) TYPE(*UINT) LEN(4)
+             DCL        VAR(&RTNVAR) TYPE(*INT) LEN(4)
+             DCL        VAR(&PWDPTR) TYPE(*PTR)
+             DCL        VAR(&PWDBUFFER) TYPE(*CHAR) LEN(641)
+             DCL        VAR(&PWDBUFLEN) TYPE(*INT) LEN(4) VALUE(641)
+             DCL        VAR(&TEMPPWDPTR) TYPE(*PTR)
+             DCL        VAR(&PASSWD) TYPE(*CHAR) LEN(64)
+             DCL        VAR(&PW_NAME) TYPE(*PTR) STG(*DEFINED) DEFVAR(&PASSWD 1)
+             DCL        VAR(&PW_UID) TYPE(*UINT) STG(*DEFINED) LEN(4) DEFVAR(&PASSWD 17)
+             DCL        VAR(&PW_GID) TYPE(*UINT) STG(*DEFINED) LEN(4) DEFVAR(&PASSWD 21)
+             DCL        VAR(&PW_HOMEDIR) TYPE(*PTR) STG(*DEFINED) DEFVAR(&PASSWD 33)
+             DCL        VAR(&PW_INLPGM) TYPE(*PTR) STG(*DEFINED) DEFVAR(&PASSWD 49)
+             DCL        VAR(&HOMEDIR1) TYPE(*CHAR) STG(*BASED) +
+                          LEN(640) BASPTR(&PW_HOMEDIR)
+
+             /* IFS Object Check */
+             DCL        VAR(&DIRLOC) TYPE(*CHAR) LEN(512)
+             DCL        VAR(&DIRLOCNULL) TYPE(*CHAR) LEN(513)
+             DCL        VAR(&MODE) TYPE(*INT) LEN(4)
+             DCL        VAR(&IFSFILECHK) TYPE(*CHAR) LEN(255)
+             DCL        VAR(&IFSRTNVAL) TYPE(*INT)
+             DCL        VAR(&NULL) TYPE(*CHAR) LEN(1) VALUE(X'00')
+             DCL        VAR(&ERRPTR) TYPE(*PTR)
+             DCL        VAR(&ERRNUMPTR) TYPE(*INT) STG(*BASED) +
+                          BASPTR(&ERRPTR)
+
+             MONMSG     MSGID(CPF0000) EXEC(GOTO CMDLBL(ERRORS))
+
+             /* Parse from and to source files from 20 char parms                          */
+             CHGVAR     VAR(&FROMFILE) VALUE(%SST(&FROMFULL 1 10))
+             CHGVAR     VAR(&FROMLIB) VALUE(%SST(&FROMFULL 11 10))
+
+             /* Retrieve job date/time info */
+             RTVSYSVAL  SYSVAL(QDATE) RTNVAR(&QDATE)
+             RTVSYSVAL  SYSVAL(QTIME) RTNVAR(&QTIME)
+             RTVJOBA    JOB(&CURJOB) USER(&CURUSER) NBR(&CURNBR)
+             CVTDAT     DATE(&QDATE) TOVAR(&QDATE10) FROMFMT(*JOB) +
+                          TOFMT(*YYMD) TOSEP(*NONE)
+             RTVNETA    SYSNAME(&SYSNAME)
+
+             /* Retrieve home directory */
+             /* MBRHOME    HOMEDIR(&HOMEDIR)  */
+             CALLSUBR   SUBR(GETHOME)
+
+             /* User home directory as base for output directory */
+             IF         COND(&ARCIFSDIR *EQ '*HOMEDIR') THEN(DO)
+
+             /* If home directory blank, throw error */
+             IF         COND(&HOMEDIR *EQ ' ') THEN(DO)
+             SNDPGMMSG  MSGID(CPF9898) MSGF(QCPFMSG) MSGDTA('User +
+                          must have a home directory specified in +
+                          their user profile. Copy cancelled') +
+                          MSGTYPE(*ESCAPE)
+             ENDDO
+
+             /* Build archive directory path based on user home dir */
+             /* if the *LIBFILEMBR parameter was specified.         */
+             CHGVAR     VAR(&MBRARCDIR) VALUE(&HOMEDIR |< '/' |< +
+                          &HOMESUBDIR)
+
+             ENDDO
+
+             /* Selected directory as base for output directory */
+             IF         COND(&ARCIFSDIR *NE '*HOMEDIR') THEN(DO)
+
+             /* Build archive directory path based on passed dir name */
+             CHGVAR     VAR(&MBRARCDIR) VALUE(&ARCIFSDIR)
+
+             /* Make the IFS output directory */
+             MKDIR      DIR(&MBRARCDIR) DTAAUT(*RWX) OBJAUT(*ALL)
+             MONMSG     MSGID(CPF0000)
+
+             ENDDO
+
+             /* Save file to /archivedir/lib_file_mbr.filetype */
+             IF         COND(&OUTPUTFMT *EQ *LIBFILEMBR) THEN(DO)
+             CHGVAR     VAR(&SRCLIBDIR) VALUE(' ')
+             CHGVAR     VAR(&SRCFILEDIR) VALUE(' ')
+             ENDDO
+
+             /* Save file to /archivedir/libname/filename path */
+             IF         COND(&OUTPUTFMT *EQ *LIBFILEDIR) THEN(DO)
+             /* Build lib level dir */
+             CHGVAR     VAR(&SRCLIBDIR) VALUE(&MBRARCDIR |< '/' |< +
+                          &FROMLIB)
+             /* Build file level dir */
+             CHGVAR     VAR(&SRCFILEDIR) VALUE(&MBRARCDIR |< '/' |< +
+                          &FROMLIB |< '/' |< &FROMFILE)
+             ENDDO
+
+             /* Make the IFS output directory if not found */
+             /* Base security on top level dir auth already there */
+             MKDIR      DIR(&MBRARCDIR) DTAAUT(*INDIR) OBJAUT(*INDIR)
+             MONMSG     MSGID(CPF0000)
+
+             /* Make the lib level IFS dir if not found */
+             /* Base security on top level dir auth already there */
+             MKDIR      DIR(&SRCLIBDIR) DTAAUT(*INDIR) OBJAUT(*INDIR)
+             MONMSG     MSGID(CPF0000)
+
+             /* Make the lib level IFS dir if not found */
+             /* Base security on top level dir auth already there */
+             MKDIR      DIR(&SRCFILEDIR) DTAAUT(*INDIR) OBJAUT(*INDIR)
+             MONMSG     MSGID(CPF0000)
+
+             /* Check for archive source directory. */
+             CHGVAR     VAR(&IFSFILECHK) VALUE(&MBRARCDIR)
+             CALLSUBR   SUBR(CHKIFS) RTNVAL(&IFSRTNVAL)
+             IF         COND(&IFSRTNVAL *NE 0) THEN(DO)
+             /* No IFS dir */
+             SNDPGMMSG  MSGID(CPF9898) MSGF(QCPFMSG) MSGDTA('Archive +
+                          source output dir' |> &MBRARCDIR |> 'does +
+                          not appear to exist or you have no +
+                          permissions. Copy cancelled') +
+                          MSGTYPE(*ESCAPE)
+             ENDDO
+
+             /* Check for lib source dir if set */
+             IF         COND(&SRCLIBDIR *NE ' ') THEN(DO)
+             CHGVAR     VAR(&IFSFILECHK) VALUE(&SRCLIBDIR)
+             CALLSUBR   SUBR(CHKIFS) RTNVAL(&IFSRTNVAL)
+             IF         COND(&IFSRTNVAL *NE 0) THEN(DO)
+             /* No IFS dir */
+             SNDPGMMSG  MSGID(CPF9898) MSGF(QCPFMSG) MSGDTA('Archive +
+                          source output dir' |> &SRCLIBDIR |> 'does +
+                          not appear to exist or you have no +
+                          permissions. Copy cancelled') +
+                          MSGTYPE(*ESCAPE)
+             ENDDO
+             ENDDO  /* SRCLIBDIR <> '' */
+
+             /* Check for file source dir if set */
+             IF         COND(&SRCFILEDIR *NE ' ') THEN(DO)
+             CHGVAR     VAR(&IFSFILECHK) VALUE(&SRCFILEDIR)
+             CALLSUBR   SUBR(CHKIFS) RTNVAL(&IFSRTNVAL)
+             IF         COND(&IFSRTNVAL *NE 0) THEN(DO)
+             /* No IFS dir */
+             SNDPGMMSG  MSGID(CPF9898) MSGF(QCPFMSG) MSGDTA('Archive +
+                          source output dir' |> &SRCFILEDIR |> +
+                          'does not appear to exist or you have no +
+                          permissions. Copy cancelled') +
+                          MSGTYPE(*ESCAPE)
+             ENDDO
+             ENDDO  /* SRCFILEDIR <> '' */
+
+             /* Check for from source member. Bail if not found.                           */
+             CHKOBJ     OBJ(&FROMLIB/&FROMFILE) OBJTYPE(*FILE) +
+                          MBR(&FROMMEMBER)
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+             SNDPGMMSG  MSGID(CPF9898) MSGF(QCPFMSG) MSGDTA('Source +
+                          member to archive' |> &FROMLIB |< '/' |< +
+                          &FROMFILE |< '(' |< &FROMMEMBER |< ') +
+                          does not appear to exist or you have no +
+                          permissions. Copy cancelled') +
+                          MSGTYPE(*ESCAPE)
+             ENDDO
+
+             /* Check for the to src mbr. Only copy if it has records */
+             RTVMBRD    FILE(&FROMLIB/&FROMFILE) MBR(&FROMMEMBER) +
+                          SRCTYPE(&FROMTYPE) NBRCURRCD(&FRMCOUNT)
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+             CHGVAR     VAR(&FRMCOUNT) VALUE(0)
+             ENDDO
+
+             IF         COND(&FRMCOUNT *LE 0) THEN(DO)
+             SNDPGMMSG  MSGID(CPF9898) MSGF(QCPFMSG) MSGDTA('Source +
+                          member to archive' |> &FROMLIB |< '/' |< +
+                          &FROMFILE |< '(' |< &FROMMEMBER |< ') has +
+                          0 records or you have no permissions. +
+                          Copy cancelled') MSGTYPE(*ESCAPE)
+             ENDDO
+
+             /* Get member metadata */
+
+             /* Remove metadata info if it exists */
+             DLTF       FILE(QTEMP/SQLTMP0001)
+             MONMSG     MSGID(CPF0000)
+
+             /* Set SQL to get member metadata */
+             CHGVAR     VAR(&SQLMETA) VALUE('+
+             CREATE TABLE QTEMP/SQLTMP0001 as (+
+             SELECT ''' |< &SYSNAME |< ''' AS SYSTEM,+
+             TABLE_SCHEMA AS LIBRARY,+
+             TABLE_NAME AS FILE ,+
+             TABLE_PARTITION AS MEMBER,+
+             SOURCE_TYPE as TYPE,+
+             CAST(PARTITION_TEXT AS VARCHAR(50) CCSID 37) as TEXT,+
+             NUMBER_ROWS AS ROWCOUNT,+
+             CREATE_TIMESTAMP,+
+             LAST_CHANGE_TIMESTAMP,+
+             LAST_SOURCE_UPDATE_TIMESTAMP +
+             FROM QSYS2.SYSPARTITIONSTAT +
+             WHERE TABLE_SCHEMA=''' |< &FROMLIB |< ''' AND +
+             TABLE_NAME='''|< &FROMFILE |<''' AND +
+             TABLE_PARTITION='''|< &FROMMEMBER |<''' +
+             ) WITH DATA')
+
+             /* Run the metadata query */
+             IF         COND(&PROMPTSQL *EQ *YES) THEN(DO)
+             ?          RUNSQL ??SQL(&SQLMETA) ??COMMIT(*NONE) +
+                          ??NAMING(*SYS) OPTION(*LIST)
+             ENDDO
+             IF         COND(&PROMPTSQL *NE *YES) THEN(DO)
+                RUNSQL     SQL(&SQLMETA) COMMIT(*NONE) NAMING(*SYS)
+             ENDDO
+
+             /* Build from member path from IFS file info  */
+             CHGVAR     VAR(&FROMMBR) VALUE('/QSYS.LIB/' |< +
+                          &FROMLIB |< '.LIB/' |< &FROMFILE |< +
+                          '.FILE/' |< &FROMMEMBER |< '.MBR')
+
+             /*--------------------------*/
+             /* Archive the member if it exists with data in it.                           */
+             /* Get ext from source type */
+             /*--------------------------*/
+
+             /* Output file with /archivedir/lib_file_mbr.type */
+             IF         COND(&OUTPUTFMT *EQ *LIBFILEMBR) THEN(DO)
+
+             /*--------------------------*/
+             /* Source type is NOT empty */
+             /*--------------------------*/
+             IF         COND(&FROMTYPE *NE ' ') THEN(DO)
+
+             /* Append timestamp to file names */
+             IF         COND(&APPENDTS *EQ *YES) THEN(DO)
+             CHGVAR     VAR(&OUTPUTFILE) VALUE(&MBRARCDIR |< '/' |< +
+                          &FROMLIB |< '_' |< &FROMFILE |< '_' |< +
+                          &FROMMEMBER |< '_' |< &QDATE10 |< '_' |< +
+                          &QTIME |< '.' |< &FROMTYPE)
+             CHGVAR     VAR(&OUTPUTMETA) VALUE(&MBRARCDIR |< '/' |< +
+                          &FROMLIB |< '_' |< &FROMFILE |< '_' |< +
+                          &FROMMEMBER |< '_' |< &QDATE10 |< '_' |< +
+                          &QTIME |< '.' |< 'metainfo')
+             ENDDO
+
+             /* Don't append timestamp to file names */
+             IF         COND(&APPENDTS *EQ *NO) THEN(DO)
+             CHGVAR     VAR(&OUTPUTFILE) VALUE(&MBRARCDIR |< '/' |< +
+                          &FROMLIB |< '_' |< &FROMFILE |< '_' |< +
+                          &FROMMEMBER |< '.' |< &FROMTYPE)
+             CHGVAR     VAR(&OUTPUTMETA) VALUE(&MBRARCDIR |< '/' |< +
+                          &FROMLIB |< '_' |< &FROMFILE |< '_' |< +
+                          &FROMMEMBER |< '.' |< 'metainfo')
+             ENDDO
+
+             ENDDO
+
+             /*--------------------------*/
+             /* Use txt extension if nothing specified  for type */
+             /*--------------------------*/
+             IF         COND(&FROMTYPE *EQ ' ') THEN(DO)
+
+             /* Append timestamp to file names */
+             IF         COND(&APPENDTS *EQ *YES) THEN(DO)
+             CHGVAR     VAR(&OUTPUTFILE) VALUE(&MBRARCDIR |< '/' |< +
+                          &FROMLIB |< '_' |< &FROMFILE |< '_' |< +
+                          &FROMMEMBER |< '_' |< &QDATE10 |< '_' |< +
+                          &QTIME |< '.' |< 'txt')
+             CHGVAR     VAR(&OUTPUTMETA) VALUE(&MBRARCDIR |< '/' |< +
+                          &FROMLIB |< '_' |< &FROMFILE |< '_' |< +
+                          &FROMMEMBER |< '_' |< &QDATE10 |< '_' |< +
+                          &QTIME |< '.' |< 'metainfo')
+             ENDDO
+
+             /* Don't append timestamp to file names */
+             IF         COND(&APPENDTS *EQ *NO) THEN(DO)
+             CHGVAR     VAR(&OUTPUTFILE) VALUE(&MBRARCDIR |< '/' |< +
+                          &FROMLIB |< '_' |< &FROMFILE |< '_' |< +
+                          &FROMMEMBER |< '.' |< 'txt')
+             CHGVAR     VAR(&OUTPUTMETA) VALUE(&MBRARCDIR |< '/' |< +
+                          &FROMLIB |< '_' |< &FROMFILE |< '_' |< +
+                          &FROMMEMBER |< '.' |< 'metainfo')
+             ENDDO
+
+             ENDDO
+
+             ENDDO   /* ENDDO *LIBFILEMBR */
+
+             /* Output file with /archivedir/lib/file/mbr.type */
+             IF         COND(&OUTPUTFMT *EQ *LIBFILEDIR) THEN(DO)
+
+             /*--------------------------*/
+             /* Source type is NOT empty */
+             /*--------------------------*/
+             IF         COND(&FROMTYPE *NE ' ') THEN(DO)
+
+             /* Append timestamp to file names */
+             IF         COND(&APPENDTS *EQ *YES) THEN(DO)
+             CHGVAR     VAR(&OUTPUTFILE) VALUE(&SRCFILEDIR |< '/' |< +
+                          &FROMMEMBER |< '_' |< &QDATE10 |< '_' |< +
+                          &QTIME |< '.' |< &FROMTYPE)
+             CHGVAR     VAR(&OUTPUTMETA) VALUE(&SRCFILEDIR |< '/' |< +
+                          &FROMMEMBER |< '_' |< &QDATE10 |< '_' |< +
+                          &QTIME |< '.' |< 'metainfo')
+             ENDDO
+
+             /* Don't append timestamp to file names */
+             IF         COND(&APPENDTS *EQ *NO) THEN(DO)
+             CHGVAR     VAR(&OUTPUTFILE) VALUE(&SRCFILEDIR |< '/' |< +
+                          &FROMMEMBER |< '.' |< &FROMTYPE)
+             CHGVAR     VAR(&OUTPUTMETA) VALUE(&SRCFILEDIR |< '/' |< +
+                          &FROMMEMBER |< '.' |< 'metainfo')
+             ENDDO
+
+             ENDDO
+
+             /*--------------------------*/
+             /* Use txt extension if nothing specified  for type */
+             /*--------------------------*/
+             IF         COND(&FROMTYPE *EQ ' ') THEN(DO)
+
+             /* Append timestamp to file names */
+             IF         COND(&APPENDTS *EQ *YES) THEN(DO)
+             CHGVAR     VAR(&OUTPUTFILE) VALUE(&SRCFILEDIR |< '/' |< +
+                          &FROMMEMBER |< '_' |< &QDATE10 |< '_' |< +
+                          &QTIME |< '.' |< 'txt')
+             CHGVAR     VAR(&OUTPUTMETA) VALUE(&SRCFILEDIR |< '/' |< +
+                          &FROMMEMBER |< '_' |< &QDATE10 |< '_' |< +
+                          &QTIME |< '.' |< 'metainfo')
+             ENDDO
+
+             /* Don't append timestamp to file names */
+             IF         COND(&APPENDTS *EQ *NO) THEN(DO)
+             CHGVAR     VAR(&OUTPUTFILE) VALUE(&SRCFILEDIR |< '/' |< +
+                          &FROMMEMBER |< '.' |< 'txt')
+             CHGVAR     VAR(&OUTPUTMETA) VALUE(&SRCFILEDIR |< '/' |< +
+                          &FROMMEMBER |< '.' |< 'metainfo')
+             ENDDO
+
+             ENDDO
+
+             ENDDO   /* ENDDO *LIBFILEMBR */
+
+             /* Check for existing output file */
+             CHGVAR     VAR(&IFSFILECHK) VALUE(&OUTPUTFILE)
+             CALLSUBR   SUBR(CHKIFS) RTNVAL(&IFSRTNVAL)
+             IF         COND(&IFSRTNVAL *EQ 0) THEN(DO)
+             /* IFS exists, check for replace. If *NO, bail out */
+             IF         COND(&REPLACE *EQ *NO) THEN(DO)
+             SNDPGMMSG  MSGID(CPF9898) MSGF(QCPFMSG) MSGDTA('Output +
+                          file' |> &OUTPUTFILE |> 'exists and +
+                          replace was not selected. Copy +
+                          cancelled') MSGTYPE(*ESCAPE)
+             ENDDO
+
+             ENDDO
+
+             /* Copy the file to IFS now */
+             CPYTOSTMF  FROMMBR(&FROMMBR) TOSTMF(&OUTPUTFILE) +
+                          STMFOPT(*REPLACE) CVTDTA(*AUTO) +
+                          DBFCCSID(*FILE) STMFCCSID(*PCASCII) +
+                          ENDLINFMT(*CRLF) AUT(*INDIR)
+
+             /* Copy the metadata info to IFS now if enabled */
+             IF         COND(&METAINFO *EQ *YES) THEN(DO)
+
+             CPYTOIMPF  FROMFILE(QTEMP/SQLTMP0001) +
+                          TOSTMF(&OUTPUTMETA) MBROPT(*REPLACE) +
+                          STMFCCSID(*PCASCII) STMFAUT(*INDIR) +
+                          RCDDLM(*CRLF) DTAFMT(*DLM) STRDLM(*NONE) +
+                          FLDDLM('|') ADDCOLNAM(*SYS)
+
+             /* Remove metadata info if it exists */
+             DLTF       FILE(QTEMP/SQLTMP0001)
+             MONMSG     MSGID(CPF0000)
+
+             /* Write metainfo as diag message */
+             SNDPGMMSG  MSGID(CPF9898) MSGF(QCPFMSG) MSGDTA('Source +
+                          member' |> &FROMLIB |< '/' |< &FROMFILE +
+                          |< '(' |< &FROMMEMBER |< ') metadata info +
+                          copied to archive' |> &OUTPUTMETA) +
+                          TOPGMQ(*SAME) MSGTYPE(*DIAG)
+             ENDDO
+
+             /* Send completion message */
+             SNDPGMMSG  MSGID(CPF9898) MSGF(QCPFMSG) MSGDTA('Source +
+                          member' |> &FROMLIB |< '/' |< &FROMFILE +
+                          |< '(' |< &FROMMEMBER |< ') copied to +
+                          archive' |> &OUTPUTFILE) MSGTYPE(*COMP)
+
+             RETURN
+
+/* Handle errors */
+ERRORS:
+             SNDPGMMSG  MSGID(CPF9898) MSGF(QCPFMSG) MSGDTA('Errors +
+                          occurred while copying source member' |> +
+                          &FROMLIB |< '/' |< &FROMFILE |< '(' |< +
+                          &FROMMEMBER |< ') to archive member' |> +
+                          &OUTPUTFILE |> '). Check the job log') +
+                          MSGTYPE(*ESCAPE)
+
+             RETURN
+
+             /*-------------------------------------------*/
+             /* Define subroutines                        */
+             /*-------------------------------------------*/
+
+             /*-------------------------------------------*/
+             /* Subroutine: GETHOME to get home directory */
+             /*-------------------------------------------*/
+             SUBR       SUBR(GETHOME)
+
+             RTVUSRPRF  UID(&UIDDEC)
+             CHGVAR     VAR(&UID) VALUE(&UIDDEC)
+             CHGVAR     VAR(&PWDPTR) VALUE(%ADDR(&PASSWD))
+             CALLPRC    PRC('getpwuid_r') PARM((&UID *BYVAL) +
+                          (&PWDPTR *BYVAL) (&PWDBUFFER) (&PWDBUFLEN +
+                          *BYVAL) (&TEMPPWDPTR)) RTNVAL(&RTNVAR)
+             CALLPRC    PRC('strlen') PARM((&PW_HOMEDIR *BYVAL)) +
+                          RTNVAL(&DIRLEN)
+             IF         (&DIRLEN > 0) THEN(DO)
+             CHGVAR     VAR(&MYHOMEDIR) VALUE(%SST(&HOMEDIR1 1 &DIRLEN))
+             ENDDO
+
+             /* Return user home dir */
+             CHGVAR     VAR(&HOMEDIR) VALUE(&MYHOMEDIR)
+
+             ENDSUBR
+
+             /*-------------------------------------------*/
+             /* Subroutine: CHKIFS to get home directory  */
+             /*-------------------------------------------*/
+             SUBR       SUBR(CHKIFS)
+             CHGVAR     VAR(&DIRLOC) VALUE(&IFSFILECHK)
+             CHGVAR     VAR(&DIRLOCNULL) VALUE(%TRIM(&DIRLOC) *CAT +
+                          &NULL)
+             CALLPRC    PRC('access') PARM((&DIRLOCNULL *BYREF) +
+                          (&MODE *BYVAL)) RTNVAL(&IFSRTNVAL)
+
+             IF         COND(&IFSRTNVAL = -1) THEN(DO)
+             CALLPRC    PRC('__errno') RTNVAL(&ERRPTR)
+             /* 3025 error number means = no such path or directory */
+             ENDDO
+
+             RTNSUBR    RTNVAL(&IFSRTNVAL)
+
+             ENDSUBR
+
+ENDPGM:
+             ENDPGM
