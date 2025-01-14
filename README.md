@@ -1,23 +1,24 @@
 # Copy, Extract or Archive IBM i Source Physical File Members to IFS 
-This repo contains self-contained IBM i CL commands for copying source members from a source physical file to a selected IFS structure for backup or archive purposes or for manually committing to a Git repository you may be using in your IFS home directory (```/home/userid```)      
+This repo contains self-contained IBM i CL commands for copying source members from a source physical file to a selected IFS structure for backup or archive purposes or for manually committing to a Git repository you may be using in your IFS home directory (```/home/userid```). The main source copy/extraction/archive CL command is named: ```SRCSRCIFS```.         
 
-## The main use case would be for:
+## The main use case for SRCARCIFS would be for:
 - Poor man's source management. Teams that don't have ANY source control system in place but need a way to quickly make backup copies of source members to the IFS.   
-- Consultants or developers who need to export a group of source members for archiving, moving to another system or manually placing into their own Git development repositories.    
+- Consultants or developers who need to export a group of source members to the IFS for archiving, moving to another system or manually placing into their own Git development repositories.    
 - When working on a source member, instead of going through member copy hell, just create a timestamped archive copy as a quick backup before and after changes are made to the source members.     
 **Source member copy hell is:** Making a backup copy of a source member with naming limited to 10 characters. Ex: SRC001.CLP becomes SRC001S2.CLP or SRC001V2.CLP. Which version is the correct one ?   
 
 ## The SRCARCIFS command has the unique ability to:
-- Place each library source member that a user takes a snaphost of into the user's home directory under a subdirectory structure as follows: ```/home/user/archivesource/library/file/member```. Each developer's changes can be archived in their home directory or a generic specified command directory such as: ```/archivedsource```.
-- Optionally place all source members in a single directory with combined member names unique across libraries with naming pattern of: ```/home/user/library_file_member_date_time.srctype```
-- Timestamp the IFS output files. This is the default option for those who want to take snapshots of code to the IFS but don't use Git yet and don't want to worry about accidentally overwriting archived source members. 
-- Capture source physical file member metadata info (Originating Source Library,File,Member,Type,Text) for each member to a pipe delimited IFS file ending with ```.metainfo```
-Ex source member:
-```/home/user/archivesource/qclsrc/mbr01c.clp```
-Ex source member metadata:   
-```/home/user/archivesource/qclsrc/mbr01c.metainfo```
+- Place each library source member that a user takes a snaphost of into the user's home IFS directory under a subdirectory structure as follows: ```/home/user/archivesource/library/file/member```. Each developer's changes can be archived in their home directory by specifying an archive output directory of *HOMEDIR. Or a generic specified archive output directory such as: ```/archivedsource``` can be specified and will write the source to the selected IFS directory. ```(Output format: *LIBFILEDIR)```   
+- Optionally place all source members in a single directory with combined member names unique across libraries with naming pattern of: ```/home/user/library_file_member_date_time.srctype```. ```(Output format: *LIBFILEMBR)```.   
+- Timestamp the IFS output files. This is the default option for those who want to take snapshots of code to the IFS but don't use Git yet and don't want to worry about accidentally overwriting archived source members. ```(Append timestamp to file names: *YES)```   
+- Capture source physical file member metadata info (Originating Source Library,File,Member,Type,Text) for each member to a pipe delimited IFS file ending with ```.metainfo```. ```(Output .metainfo IFS file)```    
+Ex source member:     
+```/home/user/archivesource/qclsrc/mbr01c.clp```     
+Ex source member metadata:     
+```/home/user/archivesource/qclsrc/mbr01c.metainfo```   
 
-## Ready for Affordable Git Source Code Management   
+## Ready for Affordable Git Source Code Management  
+```iForgit helps IBM i developers eliminate Awkward Git Integration```    
 ❗If you want an affordable and easy to implement Git source management tool, check out iForGit: https://www.iforgit.com
 
 ## Installing and Building MBSRCARC via getrepo-mbsrcarc.sh script   
