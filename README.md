@@ -1,12 +1,13 @@
 # Copy, Extract or Archive IBM i Source Physical File Members to IFS 
 This repo contains self-contained IBM i CL commands for copying source members from a source physical file to a selected IFS structure for backup or archive purposes or for manually committing to a Git repository you may be using in your IFS home directory (```/home/userid```)      
 
-The main use case would be for:
+## The main use case would be for:
 - Poor man's source management. Teams that don't have ANY source control system in place but need a way to quickly make backup copies of source members to the IFS.   
-- Consultants or developers who need to export a group of source members for archiving or placing into their own Git development repositories.    
-- When working on a source member, instead of going through member copy hell, just create a timestamped archvie copy as a quick backup before and after changes are made to the source members.    
+- Consultants or developers who need to export a group of source members for archiving, moving to another system or manually placing into their own Git development repositories.    
+- When working on a source member, instead of going through member copy hell, just create a timestamped archive copy as a quick backup before and after changes are made to the source members.     
+**Source member copy hell is:** Making a backup copy of a source member with naming limited to 10 characters. Ex: SRC001.CLP becomes SRC001S2.CLP or SRC001V2.CLP. Which version is the correct one ?   
 
-The SRCARCIFS command has the unique ability to:
+## The SRCARCIFS command has the unique ability to:
 - Place each library source member that a user takes a snaphost of into the user's home directory under a subdirectory structure as follows: ```/home/user/archivesource/library/file/member```. Each developer's changes can be archived in their home directory or a generic specified command directory such as: ```/archivedsource```.
 - Optionally place all source members in a single directory with combined member names unique across libraries with naming pattern of: ```/home/user/library_file_member_date_time.srctype```
 - Timestamp the IFS output files. This is the default option for those who want to take snapshots of code to the IFS but don't use Git yet and don't want to worry about accidentally overwriting archived source members. 
