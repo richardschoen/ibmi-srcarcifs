@@ -33,7 +33,7 @@ https://github.com/richardschoen/ibmi-srcarcifs/blob/main/getrepo-mbsrcarc.sh
 Make sure a temporary dir named /tmp/MBSRCARC doesn't already exist before running the script or the git clone may fail to get current files from the repository.  
 ```
 rm -r /tmp/MBSRCARC
-wget https://github.com/richardschoen/ibmi-srcarcifs/blob/main/getrepo-mbsrcarc.sh -O - | bash
+wget https://raw.githubusercontent.com/richardschoen/ibmi-srcarcifs/refs/heads/main/getrepo-mbsrcarc.sh -O - | bash
 ```
 
 ## Manually download getrepo-mbsrcarc.sh and run it
