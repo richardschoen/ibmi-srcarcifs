@@ -32,7 +32,7 @@ https://github.com/richardschoen/ibmi-srcarcifs/blob/main/getrepo-mbsrcarc.sh
 ❗This is the easiest way to install MBSRCARC. Run the following wget command to download, build and install MBSRCARC quickly in a single step.   
 Make sure a temporary dir named /tmp/ibmi-srcarcifs doesn't already exist before running the script or the git clone may fail to get current files from the repository.  
 ```
-rm -r /tmp/MBSRCARC
+rm -r /tmp/ibmi-srcarcifs  
 wget https://raw.githubusercontent.com/richardschoen/ibmi-srcarcifs/refs/heads/main/getrepo-mbsrcarc.sh -O - | bash
 ```
 
@@ -48,10 +48,10 @@ bash getrepo-mbsrcarc.sh
 
 ```
 # Use this install method if you want to manually run each command from a QSH/PASE/SSH shell.
-mkdir /mbsrcarc
-cd /mbsrcarc 
+mkdir /ibmi-srcarcifs
+cd /ibmi-srcarcifs 
 git -c http.sslVerify=false clone --recurse-submodules https://github.com/richardschoen/ibmi-srcarcifs.git
-cd mbsrcarc
+cd ibmi-srcarcifs
 build.sh  
 ```
 ❗After building the MBSRCARC library the commands should be ready to use.    
