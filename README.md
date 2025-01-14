@@ -26,18 +26,18 @@ Ex source member metadata:
 ***(Important to change SRCCCSID variable in build.sh to your local CCSID before running build.sh. Default=37)***
 
 Use the following install script if you want to run a single shell script to clone the repo and build the library.  
-https://github.com/richardschoen/ibmi-srcarcifs/refs/heads/master/getrepo-mbsrcarc.sh   
+https://github.com/richardschoen/ibmi-srcarcifs/blob/main/getrepo-mbsrcarc.sh   
 
 ## Download and run the getrepo-qshoni.sh script in one step, using wget
 ❗This is the easiest way to install MBSRCARC. Run the following wget command to download, build and install MBSRCARC quickly in a single step.   
 Make sure a temporary dir named /tmp/MBSRCARC doesn't already exist before running the script or the git clone may fail to get current files from the repository.  
 ```
 rm -r /tmp/MBSRCARC
-wget https://github.com/richardschoen/ibmi-srcarcifs/raw/refs/heads/master/getrepo-mbsrcarc.sh -O - | bash
+wget https://github.com/richardschoen/ibmi-srcarcifs/blob/main/getrepo-mbsrcarc.sh -O - | bash
 ```
 
 ## Manually download getrepo-mbsrcarc.sh and run it
-- Download the raw getrepo-mbsrcarc.sh script or create it manually in your IFS. https://github.com/richardschoen/ibmi-srcarcifs/refs/heads/master/getrepo-mbsrcarc.sh    
+- Download the raw getrepo-mbsrcarc.sh script or create it manually in your IFS. https://github.com/richardschoen/ibmi-srcarcifs/blob/main/getrepo-mbsrcarc.sh     
 - Then run the getrepo-mbsrcarc.sh script to automatically clone the repo and auto-run the build.sh to create the MBSRCARC library and associated objects.   
 ```
 bash getrepo-mbsrcarc.sh
