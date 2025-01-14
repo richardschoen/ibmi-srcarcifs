@@ -20,7 +20,7 @@ Ex source member metadata:
 ## Ready for Affordable Git Source Code Management   
 ❗If you want an affordable and easy to implement Git source management tool, check out iForGit: https://www.iforgit.com
 
-# Installing and Building MBSRCARC via getrepo-mbsrcarc.sh script   
+## Installing and Building MBSRCARC via getrepo-mbsrcarc.sh script   
 
 ***(Important to change SRCCCSID variable in build.sh to your local CCSID before running build.sh. Default=37)***
 
@@ -41,7 +41,7 @@ wget https://github.com/richardschoen/ibmi-srcarcifs/raw/refs/heads/master/getre
 ```
 bash getrepo-mbsrcarc.sh
 ```
-# Installing and Building MBSRCARC via Git clone and build.sh 
+## Installing and Building MBSRCARC via Git clone and build.sh 
 
 ***(Important to change SRCCCSID variable in build.sh to your local CCSID before running build.sh. Default=37)***
 
