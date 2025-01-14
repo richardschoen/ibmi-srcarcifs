@@ -48,8 +48,9 @@ bash getrepo-mbsrcarc.sh
 
 ```
 # Use this install method if you want to manually run each command from a QSH/PASE/SSH shell.
-mkdir /ibmi-srcarcifs
-cd /ibmi-srcarcifs 
+rm -r /tmp/ibmi-srcarcifs  
+mkdir /tmp/ibmi-srcarcifs
+cd /tmp/ibmi-srcarcifs 
 git -c http.sslVerify=false clone --recurse-submodules https://github.com/richardschoen/ibmi-srcarcifs.git
 cd ibmi-srcarcifs
 build.sh  
