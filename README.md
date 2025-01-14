@@ -1,7 +1,7 @@
 # Copy, Extract or Archive IBM i Source Physical File Members to IFS 
 This repo contains self-contained IBM i CL commands for copying source members from a source physical file to a selected IFS structure for backup or archive purposes or for manually committing to a Git repository you may be using in your IFS home directory (```/home/userid```). The main source copy/extraction/archive CL command is named: ```SRCSRCIFS```.         
 
-## The main use case for SRCARCIFS would be for:
+## The main use case for the SRCARCIFS command would be for:
 - Poor man's source management. Teams that don't have ANY source control system in place but need a way to quickly make backup copies of source members to the IFS.   
 - Consultants or developers who need to export a group of source members to the IFS for archiving, moving to another system or manually placing into their own Git development repositories.    
 - When working on a source member, instead of going through member copy hell, just create a timestamped archive copy as a quick backup before and after changes are made to the source members.     
