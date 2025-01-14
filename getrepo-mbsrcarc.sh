@@ -8,7 +8,7 @@
 #               Existing MBSRCARC library will be cleared by build.sh
 #----------------------------------------------------------------
 INSTALLTEMP="/tmp"
-INSTALLIFS="/tmp/MBSRCARC"
+INSTALLIFS="/tmp/ibmi-srcarcifs"
 REPONAME="https://github.com/richardschoen/ibmi-srcarcifs.git"
 
 # Create temp download IFS location
