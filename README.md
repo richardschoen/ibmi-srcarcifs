@@ -48,6 +48,7 @@ bash getrepo-mbsrcarc.sh
 
 ```
 # Use this install method if you want to manually run each command from a QSH/PASE/SSH shell.
+cd /  
 rm -r /tmp/ibmi-srcarcifs  
 mkdir /tmp/ibmi-srcarcifs
 cd /tmp   
