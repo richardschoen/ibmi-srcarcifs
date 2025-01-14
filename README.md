@@ -30,7 +30,7 @@ https://github.com/richardschoen/ibmi-srcarcifs/blob/main/getrepo-mbsrcarc.sh
 
 ## Download and run the getrepo-qshoni.sh script in one step, using wget
 ❗This is the easiest way to install MBSRCARC. Run the following wget command to download, build and install MBSRCARC quickly in a single step.   
-Make sure a temporary dir named /tmp/MBSRCARC doesn't already exist before running the script or the git clone may fail to get current files from the repository.  
+Make sure a temporary dir named /tmp/ibmi-srcarcifs doesn't already exist before running the script or the git clone may fail to get current files from the repository.  
 ```
 rm -r /tmp/MBSRCARC
 wget https://raw.githubusercontent.com/richardschoen/ibmi-srcarcifs/refs/heads/main/getrepo-mbsrcarc.sh -O - | bash
