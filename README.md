@@ -1,14 +1,23 @@
-# Copy/Archive IBM i Source Physical File Members to IFS 
-This repo contains self-contained IBM i CL commands for copying source members from a source physical file to a selected IFS structure for backup/archive purposes or for committing to a git repository you may be using.
+# Copy, Extract or Archive IBM i Source Physical File Members to IFS 
+This repo contains self-contained IBM i CL commands for copying source members from a source physical file to a selected IFS structure for backup or archive purposes or for committing to a Git repository you may be using in your IFS home directory (```/home/userid```)      
 
-It has the unique feature of being able to:
-- Place each library source member a user takes a snaphost of into the user's home directory under a subdirectory structure as follows: ```/home/user/archivesource/library/file/member```
-- Optionally place all source members in a single directory with member name of: ```library_file_member_date_time.srctype```
-- Timestamp the IFS output files. This is the default option for those who want to snapshot code to the IFS but don't use Git yet.
-- Capture source physical file member metadata info for each member to an IFS file ending with ```.mbrinfo```
+The main use case would be for:
+- Poor man's source management. Teams that don't have ANY source control system in place but need a way to quickly make backup copies of source members to the IFS.   
+- Consultants or developers who need to export a group of source members for archiving or placing into their own Git development repositories.    
+- When working on a source member, instead of going through member copy hell, just create a timestamped archvie copy as a quick backup before and after changes are made to the source members.    
 
+The SRCARCIFS command has the unique ability to:
+- Place each library source member that a user takes a snaphost of into the user's home directory under a subdirectory structure as follows: ```/home/user/archivesource/library/file/member```. Each developer's changes can be archived in their home directory or a generic specified command directory such as: ```/archivedsource```.
+- Optionally place all source members in a single directory with combined member names unique across libraries with naming pattern of: ```/home/user/library_file_member_date_time.srctype```
+- Timestamp the IFS output files. This is the default option for those who want to take snapshots of code to the IFS but don't use Git yet and don't want to worry about accidentally overwriting archived source members. 
+- Capture source physical file member metadata info (Originating Source Library,File,Member,Type,Text) for each member to a pipe delimited IFS file ending with ```.metainfo```
+Ex source member:
+```/home/user/archivesource/qclsrc/mbr01c.clp```
+Ex source member metadata:   
+```/home/user/archivesource/qclsrc/mbr01c.metainfo```
+
+## Ready for Affordable Git Source Code Management   
 ❗If you want an affordable and easy to implement Git source management tool, check out iForGit: https://www.iforgit.com
-
   
 ## Sample Command with all command parameters
 
