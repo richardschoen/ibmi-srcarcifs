@@ -54,7 +54,7 @@ git -c http.sslVerify=false clone --recurse-submodules https://github.com/richar
 cd mbsrcarc
 build.sh  
 ```
-After building the MBSRCARC library the commands should be ready to use.
+❗After building the MBSRCARC library the commands should be ready to use.    
   
 ## Sample Command with all command parameters
 
