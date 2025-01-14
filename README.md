@@ -5,7 +5,7 @@ This repo contains self-contained IBM i CL commands for copying source members f
 - Poor man's source management. Teams that don't have ANY source control system in place but need a way to quickly make backup copies of source members to the IFS.   
 - Consultants or developers who need to export a group of source members to the IFS for archiving, moving to another system or manually placing into their own Git development repositories.    
 - When working on a source member, instead of going through member copy hell, just create a timestamped archive copy as a quick backup before and after changes are made to the source members.     
-**Source member copy hell is:** Making a backup copy of a source member with naming limited to 10 characters. Ex: SRC001.CLP becomes SRC001S2.CLP or SRC001V2.CLP. Which version is the correct one ?   
+**Source member copy hell is:** Making a backup copy of a source member with naming limited to 10 characters. Ex: ```SRC001.CLP``` becomes ```SRC001S2.CLP``` or ```SRC001V2.CLP```. Which version is the correct one ?   
 
 ## The SRCARCIFS command has the unique ability to:
 - Place each library source member that a user takes a snaphost of into the user's home IFS directory under a subdirectory structure as follows: ```/home/user/archivesource/library/file/member```. Each developer's changes can be archived in their home directory by specifying an archive output directory of *HOMEDIR. Or a generic specified archive output directory such as: ```/archivedsource``` can be specified and will write the source to the selected IFS directory. ```(Output format: *LIBFILEDIR)```   
