@@ -105,11 +105,3 @@ From source member - SRCMBR** - This is the source member to be copied/exported/
 
 **Prompt SQL - PROMPTSQL** - If you have issues with the metadata export process, you can prompt and see the SQL used to create the delimited record output for the source member metadata info. This is a convenience setting for debugging errors. You should never usually need to turn this setting on, but it's here just in case.
 
-
-
-
-
-
-
-
-
