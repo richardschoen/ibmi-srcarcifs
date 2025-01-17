@@ -81,13 +81,34 @@ SRCARCIFS SRCFILE(QGPL/QCLSRC
 ```
 
 ## SRCARCIFS command parameters
-```From source file - SRCFILE``` - This is the source file where the source members originate from.  
+**From source file - SRCFILE** - This is the source file where the source members originate from.  Example: ```QGPL/QCLSRC```
 
-From source member - SRCMBR** - This is the source member to be copied/exported/snapshotted to the IFS.   
+**From source member - SRCMBR** - This is the source member to be copied/exported/snapshotted to the IFS.  
 
-**Archive output IFS directory - ARCIFSDIR** - This is the root IFS subdirectory where members will be written to.    
+**Archive output IFS directory - ARCIFSDIR** - This is the root IFS subdirectory that will then contain a specific subdirectory structure where members will be written to when exported. 
 
-**Home subdir if \*HOMEDIR set - HOMESUBDIR** - If the user specified *HOMEDIR on the ARCIFSDIR parm, this is the subdirectory within the users home directory that gets created. You can name it anything you want.Default value:   Ex: ```/home/userid/archivesource```
+The default setting is ```*HOMEDIR``` so a directory system based on the parameter values specified on the ```HOMESUBDIR``` parameter will be created within the user's home directory. All subdirectories will be auto-created during export. The default value for ```HOMESUBDIR``` is: ```archivesource```.
+
+Example dir structure created when utilizing a user's home directory for archives.
+``` 
+/home/userid
+/home/userid/archivesource
+/home/userid/archivesource/qgpl
+/home/userid/archivesource/qgpl/qclsrc
+```
+
+If you don't use *HOMEDIR parameter and specify a top level IFS directory, that top level directory should already exist ideally. And then all the result of the directory structure should get auto-created. 
+
+Example root dir structure created when NOT utilizing a user's home directory for archives. This example utilizes an existing top level directory name of: ```/sourcearchive```. 
+``` 
+/sourcearchive
+/sourcearchive/archivesource/qgpl
+/sourcearchive/archivesource/qgpl/qclsrc
+```
+
+**Home subdir if \*HOMEDIR set - HOMESUBDIR** - If the user specified *HOMEDIR on the ARCIFSDIR parm, this is the subdirectory within the users home directory that gets created. You can name it anything you want. Default value: ```archivesrc```
+
+Automatic output path generated for export: ```/home/userid/archivesource```
 
 **Output format - OUTPUTFMT** - This is the directory structure and member naming format that will be used when copying source members to the IFS. The subdirectories will get auto-created.
 
@@ -103,5 +124,8 @@ From source member - SRCMBR** - This is the source member to be copied/exported/
 
 ❗ SRCARCIFS only exports source to an IFS folder. It does not currently do any interaction directly with Git. You will need to create your own Git repo directory or purchase someling like iForGit if you want more integrated source control with Git. 
 
-**Prompt SQL - PROMPTSQL** - If you have issues with the metadata export process, you can prompt and see the SQL used to create the delimited record output for the source member metadata info. This is a convenience setting for debugging errors. You should never usually need to turn this setting on, but it's here just in case.
+**Prompt SQL - PROMPTSQL** - If you have issues or get an error with the source member metadata export process, you can prompt and see the SQL used to create the delimited record output for the source member metadata info. This is a convenience setting for handlling debugging errors. You should never usually need to turn this setting on, but it's here just in case. 
+
+❗This setting only works from an interactive 5250 session.
+
 
