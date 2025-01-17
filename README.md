@@ -81,27 +81,30 @@ SRCARCIFS SRCFILE(QGPL/QCLSRC
 ```
 
 ## SRCARCIFS command parameters
-From source file - SRCFILE - This is the source file where the source members originate from.  
+```From source file - SRCFILE``` - This is the source file where the source members originate from.  
 
-From source member - SRCMBR - This is the source member to be copied/exported/snapshotted to the IFS.   
+From source member - SRCMBR** - This is the source member to be copied/exported/snapshotted to the IFS.   
 
-Archive output IFS directory - ARCIFSDIR - This is the root IFS subdirectory where members will be written to.    
+**Archive output IFS directory - ARCIFSDIR** - This is the root IFS subdirectory where members will be written to.    
 
-Home subdir if *HOMEDIR set - HOMESUBDIR - If the user specified *HOMEDIR on the ARCIFSDIR parm, this is the subdirectory within the users home directory that gets created. You can name it anything you want.Default value:   Ex: ```/home/userid/archivesource```
+**Home subdir if \*HOMEDIR set - HOMESUBDIR** - If the user specified *HOMEDIR on the ARCIFSDIR parm, this is the subdirectory within the users home directory that gets created. You can name it anything you want.Default value:   Ex: ```/home/userid/archivesource```
 
-Output format - OUTPUTFMT - This is the directory structure and member naming format that will be used when copying source members to the IFS. The subdirectories will get auto-created.
+**Output format - OUTPUTFMT** - This is the directory structure and member naming format that will be used when copying source members to the IFS. The subdirectories will get auto-created.
 
-*LIBFILEDIR - Subdirectories are auto-create within the ARCIFSDIR directory for each source library, source file and member name. This structure is similar to the directory structure for source files in the QSYS.LIB file system which is: QSYS.LIB/LIBNAME.LIB/FILENAME.FILE.MEMBER.MBR
+```*LIBFILEDIR``` - Subdirectories are auto-create within the ARCIFSDIR directory for each source library, source file and member name. This structure is similar to the directory structure for source files in the QSYS.LIB file system which is: QSYS.LIB/LIBNAME.LIB/FILENAME.FILE.MEMBER.MBR
 
-*LIBEFILEMBR - All members are written to the single directory name specified in the ARCIFSDIR parameter. Ex: ```/home/user/archivesource```. Each member is named uniquely as follows: ```LIBRARY_FILE_MEMBER.SRCTYPE```. Metadata info name would be like:  ```LIBRARY_FILE_MEMBER.METAINFO``` This should insure each source member across one or more libraries is uniquely named so there should be no naming collisions. Also by default the members are timestamped so the actual file name might be something like: ```LIBRARY_FILE_MEMBER_DATE_TIME.SRCTYPE``` Metadata info name would be like: ```LIBRARY_FILE_MEMBER_DATE_TIME.METAINFO```
+```*LIBEFILEMBR``` - All members are written to the single directory name specified in the ARCIFSDIR parameter. Ex: ```/home/user/archivesource```. Each member is named uniquely as follows: ```LIBRARY_FILE_MEMBER.SRCTYPE```. Metadata info name would be like:  ```LIBRARY_FILE_MEMBER.METAINFO``` This should insure each source member across one or more libraries is uniquely named so there should be no naming collisions. Also by default the members are timestamped so the actual file name might be something like: ```LIBRARY_FILE_MEMBER_DATE_TIME.SRCTYPE``` Metadata info name would be like: ```LIBRARY_FILE_MEMBER_DATE_TIME.METAINFO```
 
-Append timestamp to file names
+**Append timestamp to file names - APPENDTS** - When creating output files, always append a timestamp to the file path before the file extension. THis is useful if you want to use the SRCARCIFS command as a pseudo-source control mechanism. Every source member will always be output with its name and a timestamp so you can create an archive without necessarilty needing to create a Git repository because the version history info is really the timestamp on the source meember file name when it's captured to sn IFS file. 
 
-Output .metainfo IFS file - METAINFO - Output a metadata IFS file for the source member. This is a great way to keep Metadata info for each source member exported to the IFS without having to put the metadata info into the source member itself.
+**Output .metainfo IFS file - METAINFO** - When exporting a source member, the metadata that SEU/PDM/VS Code/RDi use to identify a source member and it's original library, file, member, source type and text gets lost because it's not part of the data actual source member data. Setting this parameter to *YES will output a separately named metadata info IFS file for the source member. This is a great way to keep metadata info intact for each source member exported to the IFS without having to put the metadata info into the actual source member itself. The metadata file will be created with the exact same name as rhe exported IFS source member, but it will have an extension of ```.metainfo```.
 
-Replace existing IFS file - Set this option if you want to overwrite a source member. If you have APPENDTS set to *YES, you can always set this to *NO because a new timestamped IFS file will be written for each member that gets output to the IFS.
+**Replace existing IFS file - REPLACE** - Set the replace option to *YES if you want to overwrite an existing source member in the IFS if found. If you have the ```APPENDTS``` parameter set to *YES, you can always leave this setting set to *NO because a new timestamped IFS file will always be written for each member that gets output to the IFS. Setting replace to *YES would be useful perhaps if you made your output folder in the IFS a Git repository folder. Then it's OK to always replace because you will most likely manually run a Git add/commit/push command to send the actual newly changed version to your Git repo.
 
-Prompt SQL - PROMPTSQL - If you have issues with the metadata export, you can prompt and see the SQL used to create the delimited record output for the source member metadata info.
+❗ SRCARCIFS only exports source to an IFS folder. It does not currently do any interaction directly with Git. You will need to create your own Git repo directory or purchase someling like iForGit if you want more integrated source control with Git. 
+
+**Prompt SQL - PROMPTSQL** - If you have issues with the metadata export process, you can prompt and see the SQL used to create the delimited record output for the source member metadata info. This is a convenience setting for debugging errors. You should never usually need to turn this setting on, but it's here just in case.
+
 
 
 
