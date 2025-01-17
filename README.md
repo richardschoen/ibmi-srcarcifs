@@ -4,12 +4,16 @@ This repo contains self-contained IBM i CL commands for copying source members f
 ## The main use case for the SRCARCIFS command would be for:
 - Poor man's source management. Teams that don't have ANY source control system in place but need a way to quickly make backup copies of source members to the IFS.   
 - Consultants or developers who need to export a group of source members to the IFS for archiving, moving to another system or manually placing into their own Git development repositories.    
-- When working on a source member, instead of going through member copy hell, just create a timestamped archive copy as a quick backup before and after changes are made to the source members.     
+- When working on a source member, instead of going through source member copy hell, just create a timestamped archive copy as a quick backup before and after changes are made to the source members.     
 **Source member copy hell is:** Making a backup copy of a source member with naming limited to 10 characters. Ex: ```SRC001.CLP``` becomes ```SRC001S2.CLP``` or ```SRC001V2.CLP```. Which version is the correct one ?   
 
 ## The SRCARCIFS command has the unique ability to:
-- Place each library source member that a user takes a snaphost of into the user's home IFS directory under a subdirectory structure as follows: ```/home/user/archivesource/library/file/member```. Each developer's changes can be archived in their home directory by specifying an archive output directory of *HOMEDIR. Or a generic specified archive output directory such as: ```/archivedsource``` can be specified and will write the source to the selected IFS directory. ```(Output format: *LIBFILEDIR)```   
-- Optionally place all source members in a single directory with combined member names unique across libraries with naming pattern of: ```/home/user/library_file_member_date_time.srctype```. ```(Output format: *LIBFILEMBR)```.   
+- Place each library source member that a user takes a snaphost of into the user's home IFS directory under a subdirectory structure as follows: ```/home/user/archivesource/library/file/member.srctype```. Each developer's changes can be archived in their own home directory by specifying an archive output directory of *HOMEDIR. Or a generic root level archive output directory such as: ```/archivedsource``` can be specified and will write the source to the selected IFS directory. Use this output format: ```*LIBFILEDIR```. This is the default output format.    
+   
+This output format is nice if you want a single top level directory with subdirectories nested by library, file and member name.  
+
+- Optionally place all source members within a single directory with combined member info in the file names unique across libraries with naming pattern of: ```/home/user/library_file_member_date_time.srctype```. Use this output format: ```*LIBFILEMBR```.  
+This method  is nice if you want a single level directory to contain all your archived source members.  
 - Timestamp the IFS output files. This is the default option for those who want to take snapshots of code to the IFS but don't use Git yet and don't want to worry about accidentally overwriting archived source members. ```(Append timestamp to file names: *YES)```   
 - Capture source physical file member metadata info (Originating Source Library,File,Member,Type,Text) for each member to a pipe delimited IFS file ending with ```.metainfo```. ```(Output .metainfo IFS file)```    
 Ex source member:     
